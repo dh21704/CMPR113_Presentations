@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import java.sql.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.text.Font;
 /**
  *
  * @author Danny
@@ -99,7 +100,14 @@ public class Presentation extends Application {
                primaryStage.hide();
                JOptionPane.showMessageDialog(null, "USER: " + id + " HAS BEEN FOUND");
                
-               //showDetails(int id, String password);
+               
+                try {
+                    String name = getName(id, password);
+                    
+                    foundUsers(name);
+                } catch (SQLException ex) {
+                    Logger.getLogger(Presentation.class.getName()).log(Level.SEVERE, null, ex);
+                }
            }
            else
            {
@@ -213,42 +221,167 @@ public class Presentation extends Application {
     
     }
     
+    public Label createLabel(String text, String font, int fontSize)
+    {
+        Label label = new Label(text);
+        label.setFont(new Font(font, fontSize));
+        return label;
+    }
+    
+    public String getName(int id, String password) throws SQLException
+    {
+        String name = null;
+    
+        String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
+
+        String sql = "SELECT id, password, name FROM kaiser WHERE id = ? AND password = ?";
+        
+        try(Connection conn = DriverManager.getConnection(url);
+                PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, password);
+            
+            ResultSet result = pstmt.executeQuery();
+            
+            if(result.next())
+            {
+                name = result.getString("name");
+            }
+        } catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        
+        return name;
+    }
+           
+    
     public void foundUsers(String name) throws SQLException {
     String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
 
-    String sql = "SELECT id, name, gender, emergencyContact, password, appointment, appointmentReason, birth, address, phone, payment FROM kaiser WHERE name = ?";
+    String sql = "SELECT id, name, gender, emergencyContact, password, appoinment, appointmentReason, birth, address, phone, payment FROM kaiser WHERE name = ?";
 
     try (Connection conn = DriverManager.getConnection(url);
          PreparedStatement pstmt = conn.prepareStatement(sql)) {
-        
-        pstmt.setString(1, name); 
-        
+
+        pstmt.setString(1, name);
+
         ResultSet rs = pstmt.executeQuery();
-        
+
         if (rs.next()) {
             int id = rs.getInt("id");
             String nameRecovered = rs.getString("name");
             String gender = rs.getString("gender");
             String emergencyContact = rs.getString("emergencyContact");
             String password = rs.getString("password");
-            String appointment = rs.getString("appointment");  
-            String appointmentReason = rs.getString("appointmentReason");  
+            String appoinment = rs.getString("appoinment");  // Updated here
+            String appointmentReason = rs.getString("appointmentReason");
             String birth = rs.getString("birth");
             String address = rs.getString("address");
             String phone = rs.getString("phone");
             String payment = rs.getString("payment");
-            
-            // display retrieved data
+
+            // Display retrieved data
             System.out.println("ID: " + id);
             System.out.println("Name: " + nameRecovered);
             System.out.println("Gender: " + gender);
             System.out.println("Emergency Contact: " + emergencyContact);
-            System.out.println("Appointment: " + appointment);
-            System.out.println("Appointment Reason: " + appointmentReason);  
-
-            // stage code here
-            Stage stage = new Stage();
+            System.out.println("Appointment: " + appoinment);
+            System.out.println("Appointment Reason: " + appointmentReason);
+            System.out.println("Password: " + password);
+            System.out.println("Birth: " + birth);
+            System.out.println("Address: " + address);
+            System.out.println("Phone: " + phone);
+            System.out.println("Payment: " + payment);
             
+
+            // Stage code here
+            Stage stage = new Stage();
+            stage.setTitle("USER INFORMATION");
+            
+            int fontSize = 20;
+            String font = "Arial";
+            
+            String stringID = String.valueOf(id);
+            
+            Label idLabel = createLabel("ID:", font, fontSize);
+            Label showID = createLabel(stringID, font, fontSize);
+            
+            Label nameLabel = createLabel("Name:", font, fontSize);
+            Label showName = createLabel(name, font, fontSize);
+            
+            Label passwordLabel = createLabel("Password:", font, fontSize);
+            Label showPassword = createLabel(password, font, fontSize);
+                   
+            Label appointmentLabel = createLabel("Appointment:", font, fontSize);
+            Label showAppointment = createLabel(address, font, fontSize);
+            
+            Label birthLabel = createLabel("Birth:", font, fontSize);
+            Label showBirth = createLabel(birth, font, fontSize);
+            
+            Label genderLabel = createLabel("Gender:", font, fontSize);
+            Label showGender = createLabel(gender, font, fontSize);
+            
+            Label addressLabel = createLabel("Address:", font, fontSize);
+            Label showAddress = createLabel(address, font, fontSize);
+            
+            Label phoneLabel = createLabel("Phone:", font, fontSize);
+            Label showPhone = createLabel(phone, font, fontSize);
+            
+            Label emergencyContactLabel = createLabel("Emergency Contact:", font, fontSize);
+            Label showEmergencyContact = createLabel(emergencyContact, font, fontSize);
+            
+            Label paymentLabel = createLabel("Payment:", font, fontSize);
+            Label showPayment = createLabel(payment, font, fontSize);
+            
+            Label appointmentReasonLabel = createLabel("Appointment Reason:", font, fontSize);
+            Label showAppointmentReason = createLabel(appointmentReason, font, fontSize);
+            
+            GridPane gridPane = new GridPane();
+            gridPane.setPadding(new Insets(20, 20, 20, 20));
+            gridPane.setVgap(10);
+            gridPane.setHgap(10);
+            
+            gridPane.add(idLabel, 0, 0);
+            gridPane.add(showID, 2, 0);
+            
+            gridPane.add(nameLabel, 0, 1);
+            gridPane.add(showName, 2, 1);
+            
+            gridPane.add(passwordLabel, 0, 2);
+            gridPane.add(showPassword, 2, 2);
+            
+            gridPane.add(appointmentLabel, 0, 3);
+            gridPane.add(showAppointment, 2, 3);
+            
+            gridPane.add(birthLabel, 0, 4);
+            gridPane.add(showBirth, 2, 4);
+            
+            gridPane.add(genderLabel, 0, 5);
+            gridPane.add(showGender, 2, 5);
+            
+            gridPane.add(addressLabel, 0, 6);
+            gridPane.add(showAddress, 2, 6);
+            
+            gridPane.add(phoneLabel, 0, 7);
+            gridPane.add(showPhone, 2, 7);
+            
+            gridPane.add(emergencyContactLabel, 0, 8);
+            gridPane.add(showEmergencyContact, 2, 8);
+            
+            gridPane.add(paymentLabel, 0, 9);
+            gridPane.add(showPayment, 2, 9);
+            
+            gridPane.add(appointmentReasonLabel, 0, 10);
+            gridPane.add(showAppointmentReason, 2, 10);
+            
+            
+            Scene scene = new Scene(gridPane, 500, 400);
+            stage.setScene(scene);
+            stage.show();
+            
+
         } else {
             System.out.println("No user found with the name: " + name);
         }
@@ -257,6 +390,7 @@ public class Presentation extends Application {
         System.out.println(e.getMessage());
     }
 }
+
 
     
     public boolean forgotCredentials(String name, String birth, String phone, String address) {
@@ -477,31 +611,37 @@ public class Presentation extends Application {
 
     }
     
-    private void showDetails(int userID, String userName)
-    {
-     String url = "INSERT INTO kaiser (id, name) VALUES (?, ?)";
-     
-            try(Connection conn = this.connect();
-                    PreparedStatement pstmt = conn.prepareStatement(url))
-             {
-                 pstmt.setInt(1, userID);
-                 pstmt.setString(2, userName);
-                 
-                 ResultSet result = pstmt.executeQuery();
-                 
-                 if(result.next())
-                 {
-                    int showId = result.getInt("id");
-                    String showName = result.getString("name");
-                    
-                     System.out.println("INFO: " + showId + " " + showName);
-                 }
-                 
-             } catch(SQLException e)
-             {
-                 System.out.println(e.getMessage());
-             }
-    }
+//    private void showDetails(int userID, String userName)
+//    {
+//     String url = "INSERT INTO kaiser (id, name) VALUES (?, ?)";
+//     
+//            try(Connection conn = this.connect();
+//                    PreparedStatement pstmt = conn.prepareStatement(url, Statement.RETURN_GENERATED_KEYS))
+//             {
+//                 pstmt.setInt(1, userID);
+//                 pstmt.setString(2, userName);
+//                 
+//                 int affectedRows = pstmt.executeUpdate();
+//                 
+//                 if(affectedRows > 0)
+//                 {
+//                    try(ResultSet result = pstmt.getGeneratedKeys())
+//                    {
+//                     if(result.next())
+//                     {
+//                        int generatedID = result.getInt(1);
+//                        
+//                         System.out.println("INFO: INSERTED WITH ID: " + generatedID);
+//                     }
+//                    }
+//                 }
+//                 
+//             } catch(SQLException e)
+//             {
+//                 System.out.println("ERROR HERE");
+//                 System.out.println(e.getMessage());
+//             }
+//    }
 
     public Connection connect() {
         String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
