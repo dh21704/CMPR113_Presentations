@@ -31,6 +31,9 @@ import javafx.scene.text.Font;
  *
  * @author Danny
  */
+
+//precondition: none
+//postcondition: mainframe of the program
 public class Presentation extends Application {
 
     @Override
@@ -130,10 +133,40 @@ public class Presentation extends Application {
         primaryStage.show();
     }
     
+    //precondition: recieves an integer ID and a String password
+    //postcondition: accesses the database and returns the name of the user that correlates with the user ID and password
+    public String getName(int id, String password) throws SQLException
+    {
+        String name = null;
+    
+        String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
+
+        String sql = "SELECT id, password, name FROM kaiser WHERE id = ? AND password = ?";
+        
+        try(Connection conn = DriverManager.getConnection(url);
+                PreparedStatement pstmt = conn.prepareStatement(sql))
+        {
+            pstmt.setInt(1, id);
+            pstmt.setString(2, password);
+            
+            ResultSet result = pstmt.executeQuery();
+            
+            if(result.next())
+            {
+                name = result.getString("name");
+            }
+        } catch(SQLException e)
+        {
+            System.out.println(e.getMessage());
+        }
+        
+        return name;
+    }
     
     
-    
-    
+    //precondition: none
+    //postcondition: function will display the forgotten window 
+    //which is a window where the user pressed the forgot ID/Password button
     public void forgotWindow()
     {
         Stage forgotStage = new Stage();
@@ -221,6 +254,10 @@ public class Presentation extends Application {
     
     }
     
+
+    
+    //precondition: a String for text and a integer for fontSize
+    //postcondition: a Label which has the font and fontsize together
     public Label createLabel(String text, String font, int fontSize)
     {
         Label label = new Label(text);
@@ -228,34 +265,6 @@ public class Presentation extends Application {
         return label;
     }
     
-    public String getName(int id, String password) throws SQLException
-    {
-        String name = null;
-    
-        String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
-
-        String sql = "SELECT id, password, name FROM kaiser WHERE id = ? AND password = ?";
-        
-        try(Connection conn = DriverManager.getConnection(url);
-                PreparedStatement pstmt = conn.prepareStatement(sql))
-        {
-            pstmt.setInt(1, id);
-            pstmt.setString(2, password);
-            
-            ResultSet result = pstmt.executeQuery();
-            
-            if(result.next())
-            {
-                name = result.getString("name");
-            }
-        } catch(SQLException e)
-        {
-            System.out.println(e.getMessage());
-        }
-        
-        return name;
-    }
-           
     
     public void foundUsers(String name) throws SQLException {
     String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
@@ -376,7 +385,6 @@ public class Presentation extends Application {
             gridPane.add(appointmentReasonLabel, 0, 10);
             gridPane.add(showAppointmentReason, 2, 10);
             
-            
             Scene scene = new Scene(gridPane, 500, 400);
             stage.setScene(scene);
             stage.show();
@@ -392,36 +400,8 @@ public class Presentation extends Application {
 }
 
 
-    
-    public boolean forgotCredentials(String name, String birth, String phone, String address) {
-        String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
-
-        boolean isValidUser = false;
-
-        String sql = "SELECT * FROM kaiser WHERE name = ? AND birth = ? AND phone = ? AND address = ?";
-
-        try (Connection conn = DriverManager.getConnection(url); 
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-
-            
-            pstmt.setString(1, name);
-            pstmt.setString(2, birth);
-            pstmt.setString(3, phone);
-            pstmt.setString(4, address);
-
-            ResultSet rs = pstmt.executeQuery();
-
-            if (rs.next()) {
-                isValidUser = true; 
-            }
-
-        } catch (SQLException e) {
-            System.out.println("Database connection or query error: " + e.getMessage());
-        }
-
-        return isValidUser;
-    }
-
+    //precondition: none
+    //postcondition: opens the registration stage and window
     public void openRegisterWindow() {
         Stage secondStage = new Stage();
 
@@ -559,6 +539,39 @@ public class Presentation extends Application {
         secondStage.show();
     }
     
+    //precondition: recieves a String name, birth, phone number, and address
+    //postcondition: returns a boolean if the user could be found or not
+    public boolean forgotCredentials(String name, String birth, String phone, String address) {
+        String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
+
+        boolean isValidUser = false;
+
+        String sql = "SELECT * FROM kaiser WHERE name = ? AND birth = ? AND phone = ? AND address = ?";
+
+        try (Connection conn = DriverManager.getConnection(url); 
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+
+            
+            pstmt.setString(1, name);
+            pstmt.setString(2, birth);
+            pstmt.setString(3, phone);
+            pstmt.setString(4, address);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                isValidUser = true; 
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Database connection or query error: " + e.getMessage());
+        }
+
+        return isValidUser;
+    }
+    
+    //precondition: recieves an integer ID and String password
+    //postcondition: returns a boolean indictating if the user was found
      public boolean checkCredentials(int id, String password) {
         String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
 
@@ -586,6 +599,8 @@ public class Presentation extends Application {
         return isValidUser;
     }
 
+     //precondition: integer ID, String name, password, appointment, birth, gender, address, phone, contact, payment, appointment reason
+     //postcondition: enters this data into the database
     private void insertData(int id, String name, String password, String appoinment, String birth, String gender, String address, String phone, String contact, String payment, String appointmentReason) throws SQLException {
         String url = "INSERT INTO kaiser (id, name, password, appoinment, birth, gender, address, phone, emergencyContact, payment, appointmentReason) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -611,38 +626,9 @@ public class Presentation extends Application {
 
     }
     
-//    private void showDetails(int userID, String userName)
-//    {
-//     String url = "INSERT INTO kaiser (id, name) VALUES (?, ?)";
-//     
-//            try(Connection conn = this.connect();
-//                    PreparedStatement pstmt = conn.prepareStatement(url, Statement.RETURN_GENERATED_KEYS))
-//             {
-//                 pstmt.setInt(1, userID);
-//                 pstmt.setString(2, userName);
-//                 
-//                 int affectedRows = pstmt.executeUpdate();
-//                 
-//                 if(affectedRows > 0)
-//                 {
-//                    try(ResultSet result = pstmt.getGeneratedKeys())
-//                    {
-//                     if(result.next())
-//                     {
-//                        int generatedID = result.getInt(1);
-//                        
-//                         System.out.println("INFO: INSERTED WITH ID: " + generatedID);
-//                     }
-//                    }
-//                 }
-//                 
-//             } catch(SQLException e)
-//             {
-//                 System.out.println("ERROR HERE");
-//                 System.out.println(e.getMessage());
-//             }
-//    }
 
+    //precondition: none
+    //postcondition: connects to the database and returns a Connection
     public Connection connect() {
         String url = "jdbc:sqlite:C:/Users/Danny/OneDrive - Rancho Santiago Community College District/Documents/NetBeansProjects/Presentation/kaiser.db";
 
@@ -664,6 +650,9 @@ public class Presentation extends Application {
     /**
      * @param args the command line arguments
      */
+    
+    ///precondition: none
+    //postcondition: starts the program
     public static void main(String[] args) {
         launch(args);
     }
